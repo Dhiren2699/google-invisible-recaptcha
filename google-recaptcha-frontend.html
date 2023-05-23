@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script src="https://www.google.com/recaptcha/api.js?render=site-key"></script>
+  <script>
+  function enableButton() {
+    var name_check = document.getElementById("name").value;
+    var email_check = document.getElementById("email").value;
+    var message_check = document.getElementById("footerMessage").value;
+    var checkbox_check = document.getElementById("checkedRequired");
+    var sendButton_check = document.getElementById("sendButton");
+    var isEmailValid = validateEmail(email_check);
+
+    if (name_check && email_check && isEmailValid && message_check && checkbox_check.checked) {
+      sendButton_check.disabled = false;
+    } else {
+      sendButton_check.disabled = true;
+    }
+  }
+
+  function validateEmail(email) {
+    // Regular expression to validate email format
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  let token = null;
+  
+  function callExternalAPI(token) {
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const messageInput = document.getElementById("footerMessage");
+    const name = nameInput.value;
+    const email = emailInput.value;
+    const message = messageInput.value;
+  
+    const url = 'https://your-external-api.com';
+    const data = {
+      name: name,
+      email: email,
+      message: message,
+      recaptchaToken: token,
+    };
+  
+    // Send the API request
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json();
+          throw new Error(response.status);
+        }
+        
+        return response.json();
+      })
+      .then(function(data) {
+        // Handle the API response
+        console.log('Success:', data);
+        alert(data.message);
+        nameInput.value = '';
+        emailInput.value = '';
+        messageInput.value = '';
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        nameInput.value = '';
+        emailInput.value = '';
+        messageInput.value = '';        
+      });
+  }
+  
+  function submitForm() {
+    grecaptcha.execute('site-key', { action: 'submit' })
+      .then(function(token) {
+        callExternalAPI(token);
+      });
+  }
+  </script>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>html5 google captcha project</title>
+
+</head>
+
+<body>
+
+<form class="api-form" id="captchaform">
+    <div class="ab-form-input-box">
+      
+      <div class="ab-input-group">
+        <input id="name" type="name" class="ab-input" required placeholder="Name">
+        <span class="warn-text">Please enter your name</span>
+      </div>
+      
+      <div class="ab-input-group">
+        <input id="email" type="email" class="ab-input" required placeholder="Email">
+        <span class="warn-text">Please enter a valid email address</span>
+      </div>
+      
+      <div class="ab-textarea-group">
+        <textarea id="footerMessage" name="message" required placeholder="Message"></textarea>
+        <span class="warn-text">Please enter a message between 10 and 1000
+          characters</span>
+      </div>
+      
+      
+        <label for="checkedRequired">
+          <input type="checkbox" id="checkedRequired" class="check-mark" onclick="enableButton()">
+          <p class="text">I have read and agree to the Privacy Policy and
+            Terms of Service</p>
+        </label>
+      </div>
+      <div class="ab-button-group">
+      <div class="g-recaptcha" data-sitekey="site-key" data-callback="submitForm" data-size="invisible"></div>
+      <button class="ab-button-style ab-footer-button" id="sendButton" type="button" onclick="submitForm()" disabled>Send</button>       
+    </div>             
+    </div>
+  </form>
+               
+</body>
+</html>
